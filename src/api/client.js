@@ -1,10 +1,15 @@
 import axios from 'axios'
 
+// Every backend route lives under /api. Normalise VITE_API_URL so a value set
+// without the /api suffix (or with a trailing slash) still hits the right paths.
+const API_URL = (import.meta.env.VITE_API_URL || 'https://fin-backend-seven.vercel.app/api')
+  .replace(/\/+$/, '')
+  .replace(/(?<!\/api)$/, '/api')
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_URL,
 })
 
-console.log('Test')
 apiClient.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken')
   if (accessToken) {
@@ -33,7 +38,7 @@ apiClient.interceptors.response.use(
 
     try {
       refreshPromise ??= axios
-        .post(`${import.meta.env.VITE_API_URL}/auth/refresh/`, { refresh: refreshToken })
+        .post(`${API_URL}/auth/refresh/`, { refresh: refreshToken })
         .finally(() => {
           refreshPromise = null
         })
